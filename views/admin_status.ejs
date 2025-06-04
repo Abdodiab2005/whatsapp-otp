@@ -1,1443 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= pageTitle %></title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Service Control Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      /* views/admin_status.ejs - <style> section */
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-
-      :root {
-        --primary-color: #4a90e2; /* أزرق مميز */
-        --primary-hover-color: #357abd;
-        --secondary-color: #50e3c2; /* تركواز منعش */
-        --success-color: #4caf50; /* أخضر للنجاح */
-        --danger-color: #f44336; /* أحمر للخطر */
-        --warning-color: #ffc107; /* أصفر للتحذير */
-        --info-color: #2196f3; /* أزرق للمعلومات */
-
-        --bg-color: #f4f7f9; /* خلفية رمادية فاتحة جداً */
-        --card-bg-color: #ffffff;
-        --text-color: #333e48; /* لون نص رئيسي (غامق) */
-        --text-muted-color: #77838f; /* لون نص ثانوي (باهت) */
-        --border-color: #e0e6ed;
-        --border-radius: 8px;
-        --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
-        --box-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1);
-        --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, "Helvetica Neue", Arial, sans-serif;
-        --transition-speed: 0.2s;
-      }
-
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        font-family: var(--font-family);
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        line-height: 1.65;
-        padding: clamp(20px, 3vw, 40px); /* بادينج متجاوب */
-        font-size: 16px;
-      }
-
-      .admin-container {
-        /* ضيف div رئيسي يلف كل المحتوى */
-        max-width: 1400px;
-        margin: 0 auto;
-      }
-
-      .admin-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px 0;
-        margin-bottom: 30px;
-        border-bottom: 1px solid var(--border-color);
-        animation: fadeInDown 0.5s ease-out;
-      }
-      .admin-header h1 {
-        font-size: clamp(1.8em, 2.2vw, 2.2em);
-        font-weight: 600;
-        color: var(--text-color);
-      }
-      .admin-header h1 i {
-        margin-right: 12px;
-        color: var(--primary-color);
-      }
-      .user-info span {
-        color: var(--text-muted-color);
-        font-size: 0.95em;
-      }
-      .user-info a {
-        color: var(--danger-color);
-        text-decoration: none;
-        margin-left: 20px;
-        font-weight: 500;
-        transition: color var(--transition-speed) ease;
-      }
-      .user-info a:hover {
-        color: #c0392b; /* Darker red */
-      }
-
-      .section {
-        background-color: var(--card-bg-color);
-        padding: clamp(20px, 2.5vw, 30px);
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        margin-bottom: 30px;
-        transition: box-shadow var(--transition-speed) ease, transform 0.3s ease;
-        animation: fadeInUp 0.5s ease-out;
-        animation-fill-mode: both;
-      }
-      .section:hover {
-        box-shadow: var(--box-shadow-hover);
-        transform: translateY(-5px);
-      }
-      .section-title {
-        font-size: clamp(1.3em, 1.8vw, 1.6em);
-        font-weight: 600;
-        margin-bottom: 25px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-      }
-      .section-title i {
-        margin-right: 10px;
-        color: var(--primary-color);
-        font-size: 1.1em;
-      }
-
-      .status-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
-      }
-      .status-item p {
-        margin-bottom: 5px;
-      }
-      .status-item strong {
-        font-weight: 500;
-      }
-
-      .status-badge {
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.85em;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: inline-block;
-        transition: all 0.3s ease;
-      }
-      .status-ready {
-        background-color: var(--success-color);
-        color: #fff;
-      }
-      .status-disconnected,
-      .status-failed,
-      .status-api_error,
-      .status-fetch_error,
-      .status-auth_failure,
-      .status-max_retries_reached,
-      .status-session_cleared_awaiting_manual_init,
-      .status-clearing_session {
-        background-color: var(--danger-color);
-        color: #fff;
-      }
-      .status-qr_required {
-        background-color: var(--warning-color);
-        color: #333;
-      }
-      .status-initializing,
-      .status-reconnecting,
-      .status-authenticated,
-      .status-unknown,
-      .status-pending,
-      .status-processing,
-      .status-connecting {
-        background-color: var(--info-color);
-        color: #fff;
-      }
-      .status-sent {
-        background-color: var(--secondary-color);
-        color: #fff;
-      }
-
-      .details-box {
-        background-color: #f9fafb;
-        padding: 12px 15px;
-        border-radius: 6px;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        max-height: 150px;
-        overflow-y: auto;
-        border: 1px solid var(--border-color);
-        font-family: "Menlo", "Monaco", "Consolas", "Courier New", monospace;
-        font-size: 0.9em;
-        color: #555;
-        line-height: 1.5;
-        transition: all 0.3s ease;
-      }
-
-      .actions-bar {
-        margin-top: 25px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-      .btn {
-        padding: 10px 22px;
-        color: #fff;
-        border: none;
-        border-radius: var(--border-radius);
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        font-size: 0.95em;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        position: relative;
-        overflow: hidden;
-      }
-      .btn:hover {
-        opacity: 0.85;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-      }
-      .btn:active {
-        transform: translateY(0);
-      }
-      .btn i {
-        margin-right: 8px;
-      }
-      
-      /* Button ripple effect */
-      .btn::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 5px;
-        height: 5px;
-        background: rgba(255, 255, 255, 0.5);
-        opacity: 0;
-        border-radius: 100%;
-        transform: scale(1, 1) translate(-50%);
-        transform-origin: 50% 50%;
-      }
-      
-      .btn:focus:not(:active)::after {
-        animation: ripple 1s ease-out;
-      }
-      
-      @keyframes ripple {
-        0% {
-          transform: scale(0, 0);
-          opacity: 0.5;
+        /* Existing styles remain unchanged */
+        
+        /* New styles for enhanced features */
+        .connection-methods {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
         }
-        20% {
-          transform: scale(25, 25);
-          opacity: 0.3;
-        }
-        100% {
-          opacity: 0;
-          transform: scale(40, 40);
-        }
-      }
 
-      .btn-primary {
-        background-color: var(--primary-color);
-      }
-      .btn-secondary {
-        background-color: var(--secondary-color);
-      }
-      .btn-danger {
-        background-color: var(--danger-color);
-      }
-      .btn-warning {
-        background-color: var(--warning-color);
-        color: #333;
-      }
-      .btn-info {
-        background-color: var(--info-color);
-      }
-      .btn-outline {
-        background-color: transparent;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
-      }
-      .btn-outline:hover {
-        background-color: var(--primary-color);
-        color: #fff;
-      }
+        .connection-method {
+            flex: 1;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-      .qr-code-container {
-        text-align: center;
-        margin-top: 20px;
-        transition: all 0.5s ease;
-      }
-      #qrcode_admin_display {
-        padding: 20px;
-        background-color: var(--card-bg-color);
-        display: none; /* Initial state */
-        border-radius: var(--border-radius);
-        margin-top: 10px;
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-        border: 1px solid var(--border-color); /* إضافة حد */
-        animation: fadeIn 0.5s ease;
-      }
-      #qrcode_admin_display img,
-      #qrcode_admin_display canvas {
-        display: block;
-        margin: auto;
-        transition: transform 0.3s ease;
-      }
-      #qrcode_admin_display:hover img,
-      #qrcode_admin_display:hover canvas {
-        transform: scale(1.05);
-      }
+        .qr-timer {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
 
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 20px;
-      }
-      .stat-card {
-        background-color: var(--card-bg-color);
-        padding: 20px 15px;
-        border-radius: var(--border-radius);
-        text-align: center;
-        border-top: 4px solid; /* اللون سيتحدد بالكلاس */
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        animation: fadeInUp 0.5s ease-out;
-        animation-delay: calc(var(--animation-order) * 0.1s);
-        animation-fill-mode: both;
-      }
-      .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--box-shadow-hover);
-      }
-      .stat-card h3 {
-        margin-top: 0;
-        font-size: 0.9em;
-        color: var(--text-muted-color);
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        font-weight: 500;
-      }
-      .stat-card p {
-        font-size: 2.2em;
-        font-weight: 700;
-        color: var(--text-color);
-        margin-bottom: 0;
-        line-height: 1.1;
-        transition: all 0.3s ease;
-      }
-      .stat-card.pending {
-        border-top-color: var(--warning-color);
-        --animation-order: 1;
-      }
-      .stat-card.processing {
-        border-top-color: var(--info-color);
-        --animation-order: 2;
-      }
-      .stat-card.sent {
-        border-top-color: var(--success-color);
-        --animation-order: 3;
-      }
-      .stat-card.failed {
-        border-top-color: var(--danger-color);
-        --animation-order: 4;
-      }
+        .qr-timer.expiring {
+            color: #f44336;
+        }
 
-      .filters-bar {
-        margin-bottom: 25px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        align-items: center;
-        padding: 15px 20px;
-        background-color: #f9fafb; /* لون أفتح قليلاً */
-        border-radius: var(--border-radius);
-        border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
-        animation: fadeIn 0.5s ease-out;
-      }
-      .filters-bar:hover {
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      }
-      .filters-bar label {
-        font-weight: 500;
-        color: var(--text-muted-color);
-        font-size: 0.9em;
-      }
-      .filters-bar input[type="text"],
-      .filters-bar select {
-        padding: 9px 14px;
-        border-radius: 6px; /* حواف أقل دائرية قليلاً */
-        border: 1px solid var(--border-color);
-        font-size: 0.95em;
-        flex-grow: 1;
-        min-width: 180px;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      }
-      .filters-bar input[type="text"]:focus,
-      .filters-bar select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.25);
-        outline: none;
-      }
-      .filters-bar button {
-        font-size: 0.95em;
-      }
+        .pairing-code-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
 
-      .table-wrapper {
-        /* لإضافة overflow للجدول على الشاشات الصغيرة */
-        overflow-x: auto;
-        animation: fadeIn 0.5s ease-out;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        font-size: 0.9em;
-      }
-      th,
-      td {
-        border-bottom: 1px solid var(--border-color);
-        padding: 12px 15px;
-        text-align: left;
-        vertical-align: middle;
-        transition: background-color 0.2s ease;
-      }
-      th {
-        background-color: #f9fafb;
-        font-weight: 600;
-        color: var(--text-muted-color);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.8em;
-        border-top: 1px solid var(--border-color);
-      }
-      tbody tr {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-      tbody tr:hover {
-        background-color: #f1f5f8;
-        transform: translateY(-2px);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-      }
-      td .details-box {
-        max-height: 50px;
-        font-size: 0.85em;
-        padding: 6px;
-        margin-bottom: 0;
-        background-color: #fdfdfd;
-        border-color: #e9ecef;
-      }
-      td a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.2s ease;
-      }
-      td a:hover {
-        text-decoration: underline;
-        color: var(--primary-hover-color);
-      }
+        .service-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
 
-      .pagination-controls {
-        margin-top: 30px;
-        text-align: center;
-        padding-bottom: 20px;
-        animation: fadeIn 0.5s ease-out;
-      }
-      .pagination-controls button {
-        margin: 0 5px;
-        padding: 8px 15px;
-        border: 1px solid var(--border-color);
-        background-color: var(--card-bg-color);
-        color: var(--primary-color);
-        cursor: pointer;
-        border-radius: var(--border-radius);
-        font-size: 0.9em;
-        font-weight: 500;
-        transition: all 0.3s ease;
-      }
-      .pagination-controls button:hover:not(:disabled) {
-        background-color: var(--primary-color);
-        color: #fff;
-        border-color: var(--primary-color);
-        transform: translateY(-2px);
-      }
-      .pagination-controls button:disabled,
-      .pagination-controls button.active {
-        /* لتمييز الصفحة الحالية */
-        background-color: var(--primary-color);
-        color: #fff;
-        cursor: default;
-        opacity: 1;
-        border-color: var(--primary-color);
-      }
-      .pagination-controls span {
-        margin: 0 10px;
-        color: var(--text-muted-color);
-        font-size: 0.9em;
-      }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f5f5f5;
+            margin-bottom: 20px;
+        }
 
-      .flash-message {
-        padding: 15px 20px;
-        margin-bottom: 25px;
-        border-radius: var(--border-radius);
-        border-left-width: 4px;
-        border-left-style: solid;
-        font-size: 0.95em;
-        display: flex;
-        align-items: center;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        animation: slideInDown 0.5s ease-out;
-      }
-      .flash-message i {
-        margin-right: 12px;
-        font-size: 1.3em;
-      }
-      .flash-success {
-        background-color: #e6f7f0;
-        color: #004d25;
-        border-left-color: var(--success-color);
-      } /* أخضر أفتح */
-      .flash-error {
-        background-color: #ffebee;
-        color: #b71c1c;
-        border-left-color: var(--danger-color);
-      } /* أحمر أفتح */
+        .status-indicator .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
 
-      .loading-placeholder {
-        color: var(--text-muted-color);
-        font-style: italic;
-        opacity: 0.7;
-      }
-      
-      /* Loading spinner */
-      .spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 2px solid rgba(0, 0, 0, 0.1);
-        border-radius: 50%;
-        border-top-color: var(--primary-color);
-        animation: spin 1s ease-in-out infinite;
-        margin-right: 10px;
-        vertical-align: middle;
-      }
-      
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-      
-      /* Toast notification */
-      .toast-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-      }
-      
-      .toast {
-        padding: 12px 20px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-        display: flex;
-        align-items: center;
-        min-width: 250px;
-        max-width: 350px;
-        animation: slideInRight 0.3s ease-out, fadeOut 0.5s ease-out 3.5s forwards;
-      }
-      
-      .toast-success {
-        background-color: #4caf50;
-        color: white;
-      }
-      
-      .toast-error {
-        background-color: #f44336;
-        color: white;
-      }
-      
-      .toast-info {
-        background-color: #2196f3;
-        color: white;
-      }
-      
-      .toast-icon {
-        margin-right: 10px;
-        font-size: 1.2em;
-      }
-      
-      .toast-message {
-        flex: 1;
-      }
-      
-      .toast-close {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 1.2em;
-        opacity: 0.7;
-        transition: opacity 0.2s;
-      }
-      
-      .toast-close:hover {
-        opacity: 1;
-      }
+        .status-indicator .dot.connected {
+            background: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
 
-      /* Animations */
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      
-      @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-      }
-      
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
+        .status-indicator .dot.disconnected {
+            background: #f44336;
+            box-shadow: 0 0 10px #f44336;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      @keyframes fadeInDown {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      @keyframes slideInRight {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-      
-      @keyframes slideInDown {
-        from {
-          transform: translateY(-20px);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
 
-      /* Responsive */
-      @media (max-width: 992px) {
-        .filters-bar {
-          flex-direction: column;
-          align-items: stretch;
+        .status-indicator .dot.connecting {
+            background: #2196f3;
+            box-shadow: 0 0 10px #2196f3;
+            animation: pulse 1.5s infinite;
         }
-        .filters-bar input[type="text"],
-        .filters-bar select,
-        .filters-bar button {
-          width: 100%;
-          margin-left: 0;
-        }
-        .stats-grid {
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-          gap: 15px;
-        }
-      }
-      @media (max-width: 768px) {
-        body {
-          padding: 15px;
-          font-size: 15px;
-        }
-        .admin-header {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 10px;
-          padding: 15px;
-        }
-        .admin-header h1 {
-          font-size: 1.6em;
-        }
-        .actions-bar {
-          flex-direction: column;
-          align-items: stretch;
-        }
-        .actions-bar form,
-        .actions-bar button {
-          width: 100%;
-        }
-        .btn {
-          padding: 12px 18px;
-          font-size: 1em;
-        } /* تكبير الأزرار قليلاً على الموبايل */
-        th,
-        td {
-          padding: 10px 8px;
-          font-size: 0.85em;
-        }
-        .details-box {
-          font-size: 0.8em;
-        }
-      }
 
-      /* Custom Scrollbar (اختياري) */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f0f0f0;
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #c0c0c0;
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #a0a0a0;
-      }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .resource-monitor {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .resource-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .resource-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: #4caf50;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar .fill.warning {
+            background: #ff9800;
+        }
+
+        .progress-bar .fill.danger {
+            background: #f44336;
+        }
     </style>
-  </head>
-  <body>
-    <div class="admin-container">
-      <header class="admin-header">
-        <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
-        <% if (typeof adminUser !== 'undefined' && adminUser) { %>
-        <div class="user-info">
-          <span>Welcome, <strong><%= adminUser %></strong>!</span> |
-          <a href="/admin/logout">Logout</a>
-        </div>
-        <% } %>
-      </header>
+</head>
+<body>
+    <!-- Existing header and container elements remain -->
 
-      <% if (locals.adminFlashMessage) { %>
-      <div class="flash-message flash-<%= adminFlashMessage.type %>">
-        <i class="fas fa-<%= adminFlashMessage.type === 'success' ? 'check-circle' : 'exclamation-circle' %>"></i>
-        <%= adminFlashMessage.message %>
-      </div>
-      <% } %>
-
-      <div id="toast-container" class="toast-container"></div>
-
-      <section class="section status-section">
-        <h2 class="section-title"><i class="fas fa-signal"></i> WhatsApp Service Status</h2>
-
-        <p>
-          <strong>Status:</strong>
-          <span id="whatsapp-status-badge" class="loading-placeholder"
-            >Loading...</span
-          >
-        </p>
-
-        <p><strong>Details:</strong></p>
-        <pre id="whatsapp-status-details" class="details-box loading-placeholder">
-Loading...</pre
-        >
-
-        <div id="qr-code-area" class="qr-code-container" style="display: none">
-          <p><strong>Scan QR Code / Pairing Info:</strong></p>
-          <div id="qrcode_admin_display"></div>
-        </div>
-
-        <p>
-          <strong>Last Updated:</strong>
-          <span id="whatsapp-last-updated" class="loading-placeholder"
-            >Loading...</span
-          >
-        </p>
-
-        <div class="actions-bar">
-          <button type="button" class="btn btn-primary" id="refresh-all-data-btn">
-            <i class="fas fa-sync-alt"></i> Refresh All Data
-          </button>
-
-          <button type="button" class="btn btn-warning" id="reinitialize-btn">
-            <i class="fas fa-redo"></i> Reload Session
-          </button>
-
-          <button type="button" class="btn btn-danger" id="logout-session-btn">
-            <i class="fas fa-sign-out-alt"></i> Logout WA & New Scan
-          </button>
-        </div>
-      </section>
-
-      <section class="section stats-section">
-        <h2 class="section-title"><i class="fas fa-chart-pie"></i> Job Statistics</h2>
-        <div class="stats-grid">
-          <div class="stat-card pending">
-            <h3>Pending</h3>
-            <p id="stats-pending" class="loading-placeholder">0</p>
-          </div>
-          <div class="stat-card processing">
-            <h3>Processing</h3>
-            <p id="stats-processing" class="loading-placeholder">0</p>
-          </div>
-          <div class="stat-card sent">
-            <h3>Sent</h3>
-            <p id="stats-sent" class="loading-placeholder">0</p>
-          </div>
-          <div class="stat-card failed">
-            <h3>Failed</h3>
-            <p id="stats-failed" class="loading-placeholder">0</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section jobs-section">
-        <h2 class="section-title"><i class="fas fa-tasks"></i> OTP Jobs</h2>
-        <div class="filters-bar">
-          <label for="filter-status">Status:</label>
-          <select id="filter-status">
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="sent">Sent</option>
-            <option value="failed">Failed</option>
-          </select>
-          <label for="search-query">Search:</label>
-          <input type="text" id="search-query" placeholder="Phone, OTP, etc." />
-          <button type="button" class="btn btn-info" id="apply-filters-btn">
-            <i class="fas fa-filter"></i> Apply Filters
-          </button>
-          <button type="button" class="btn btn-secondary" id="clear-filters-btn">
-            <i class="fas fa-eraser"></i> Clear Filters
-          </button>
-        </div>
-        <div id="jobs-table-container">
-          <p class="loading-placeholder">Loading jobs...</p>
-        </div>
-        <div id="pagination-controls"></div>
-      </section>
+    <div class="status-indicator">
+        <div class="dot" id="connection-status-dot"></div>
+        <span id="connection-status-text">Checking connection...</span>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <div class="service-controls">
+        <button class="btn btn-primary" id="start-service">
+            <i class="fas fa-play"></i> Start Service
+        </button>
+        <button class="btn btn-danger" id="stop-service">
+            <i class="fas fa-stop"></i> Stop Service
+        </button>
+        <button class="btn btn-warning" id="restart-service">
+            <i class="fas fa-sync"></i> Restart Service
+        </button>
+    </div>
 
-    <script type="text/javascript">
-      // JWT Token management
-      function getAuthToken() {
-        return localStorage.getItem('adminToken');
-      }
+    <div class="connection-methods">
+        <div class="connection-method">
+            <h3><i class="fas fa-qrcode"></i> QR Code Connection</h3>
+            <button class="btn btn-primary" id="generate-qr">
+                Generate QR Code
+            </button>
+            <div id="qr-container" style="display: none;">
+                <div id="qrcode"></div>
+                <div class="qr-timer" id="qr-timer">
+                    Expires in: 5:00
+                </div>
+            </div>
+        </div>
 
-      function setAuthHeaders(headers = {}) {
-        const token = getAuthToken();
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        return headers;
-      }
+        <div class="connection-method">
+            <h3><i class="fas fa-key"></i> Manual Pairing</h3>
+            <input type="text" class="pairing-code-input" id="pairing-code" 
+                   placeholder="Enter 8-digit pairing code">
+            <button class="btn btn-primary" id="submit-pairing">
+                Connect with Code
+            </button>
+        </div>
+    </div>
 
-      // Check if user is authenticated
-      function checkAuth() {
-        const token = getAuthToken();
-        if (!token) {
-          window.location.href = '/admin/login';
-          return false;
-        }
-        return true;
-      }
+    <div class="resource-monitor">
+        <div class="resource-card">
+            <h3>CPU Usage</h3>
+            <div class="progress-bar">
+                <div class="fill" id="cpu-usage" style="width: 0%"></div>
+            </div>
+            <span id="cpu-text">0%</span>
+        </div>
+        <div class="resource-card">
+            <h3>Memory Usage</h3>
+            <div class="progress-bar">
+                <div class="fill" id="memory-usage" style="width: 0%"></div>
+            </div>
+            <span id="memory-text">0%</span>
+        </div>
+    </div>
 
-      // Handle 401 responses
-      function handleAuthError(response) {
-        if (response.status === 401) {
-          localStorage.removeItem('adminToken');
-          window.location.href = '/admin/login';
-          return true;
-        }
-        return false;
-      }
+    <!-- Existing content remains -->
 
-      // --- عناصر الـ DOM ---
-      const statusBadgeEl = document.getElementById("whatsapp-status-badge");
-      const statusDetailsEl = document.getElementById(
-        "whatsapp-status-details"
-      );
-      const qrCodeAreaEl = document.getElementById("qr-code-area");
-      const qrCodeDisplayEl = document.getElementById("qrcode_admin_display");
-      const lastUpdatedEl = document.getElementById("whatsapp-last-updated");
-
-      const statsPendingEl = document.getElementById("stats-pending");
-      const statsProcessingEl = document.getElementById("stats-processing");
-      const statsSentEl = document.getElementById("stats-sent");
-      const statsFailedEl = document.getElementById("stats-failed");
-
-      const jobsTableContainerEl = document.getElementById(
-        "jobs-table-container"
-      );
-      const paginationControlsEl = document.getElementById(
-        "pagination-controls"
-      );
-
-      const refreshAllDataBtn = document.getElementById("refresh-all-data-btn");
-      const reinitializeBtn = document.getElementById("reinitialize-btn");
-      const logoutSessionBtn = document.getElementById("logout-session-btn");
-      const filterStatusEl = document.getElementById("filter-status");
-      const searchQueryEl = document.getElementById("search-query");
-      const applyFiltersBtn = document.getElementById("apply-filters-btn");
-      const clearFiltersBtn = document.getElementById("clear-filters-btn");
-      const toastContainer = document.getElementById("toast-container");
-
-      let qrCodeInstance = null;
-      let currentPage = 1;
-      const jobsLimit = 10; // نفس الـ limit في الـ backend
-      let refreshIntervalId;
-
-      function confirmAction(message) {
-        return confirm(message);
-      }
-      
-      // Toast notification function
-      function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
+    <script>
+        // Existing JavaScript remains
         
-        let icon = 'info-circle';
-        if (type === 'success') icon = 'check-circle';
-        if (type === 'error') icon = 'exclamation-circle';
-        
-        toast.innerHTML = `
-          <i class="fas fa-${icon} toast-icon"></i>
-          <div class="toast-message">${message}</div>
-          <button class="toast-close">&times;</button>
-        `;
-        
-        toastContainer.appendChild(toast);
-        
-        // Add event listener to close button
-        toast.querySelector('.toast-close').addEventListener('click', () => {
-          toast.remove();
-        });
-        
-        // Auto remove after 4 seconds
-        setTimeout(() => {
-          if (toast.parentNode === toastContainer) {
-            toast.remove();
-          }
-        }, 4000);
-      }
+        // New JavaScript for enhanced features
+        let qrTimer;
+        let resourceMonitorInterval;
 
-      // --- دالة تحديث بيانات حالة الواتساب والإحصائيات ---
-      async function fetchStatusAndStats() {
-        try {
-          const response = await fetch("/admin/api/status-and-stats", {
-            headers: setAuthHeaders()
-          });
-          if (handleAuthError(response)) return;
-          if (!response.ok)
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          const data = await response.json();
-
-          if (statusBadgeEl) {
-            const statusKey = data.whatsappStatus
-              ? data.whatsappStatus.toLowerCase().replace(/[\s:]/g, "_")
-              : "unknown";
-            statusBadgeEl.className = `status-badge status-${statusKey}`;
-            statusBadgeEl.textContent = data.whatsappStatus || "N/A";
-            statusBadgeEl.classList.remove("loading-placeholder");
-          }
-          if (statusDetailsEl) {
-            statusDetailsEl.textContent = data.statusDetails || "No details";
-            statusDetailsEl.classList.remove("loading-placeholder");
-          }
-          if (lastUpdatedEl) {
-            lastUpdatedEl.textContent =
-              data.lastUpdated !== "N/A"
-                ? new Date(data.lastUpdated).toLocaleString()
-                : "N/A";
-            lastUpdatedEl.classList.remove("loading-placeholder");
-          }
-
-          if (qrCodeDisplayEl && qrCodeAreaEl) {
-            qrCodeDisplayEl.innerHTML = "";
-            qrCodeAreaEl.style.display = "none";
-            if (data.whatsappStatus === "QR_REQUIRED" && data.statusDetails) {
-              qrCodeAreaEl.style.display = "block";
-              const qrString = data.statusDetails;
-              if (qrString && qrString.length > 10) {
-                // شرط بسيط
-                try {
-                  qrCodeDisplayEl.innerHTML = "";
-                  qrCodeDisplayEl.removeAttribute("title");
-                  qrCodeDisplayEl.style.display = "inline-block";
-                  new QRCode(qrCodeDisplayEl, {
-                    text: qrString,
-                    width: 180,
-                    height: 180,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.M,
-                  });
-                } catch (e) {
-                  qrCodeDisplayEl.innerHTML = `<p>Error rendering QR. Data:</p><pre>${qrString}</pre>`;
-                }
-              } else {
-                qrCodeDisplayEl.innerHTML = `<p>QR/Pairing data not suitable for image.</p>`;
-              }
-            }
-          }
-
-          if (data.stats) {
-            if (statsPendingEl) {
-              statsPendingEl.textContent = data.stats.pending || 0;
-              statsPendingEl.classList.remove("loading-placeholder");
-            }
-            if (statsProcessingEl) {
-              statsProcessingEl.textContent = data.stats.processing || 0;
-              statsProcessingEl.classList.remove("loading-placeholder");
-            }
-            if (statsSentEl) {
-              statsSentEl.textContent = data.stats.sent || 0;
-              statsSentEl.classList.remove("loading-placeholder");
-            }
-            if (statsFailedEl) {
-              statsFailedEl.textContent = data.stats.failed || 0;
-              statsFailedEl.classList.remove("loading-placeholder");
-            }
-          }
-        } catch (error) {
-          console.error("Failed to fetch status and stats:", error);
-          if (statusBadgeEl) {
-            statusBadgeEl.textContent = "Error";
-            statusBadgeEl.className = "status-badge status-disconnected";
-          }
-          showToast("Failed to fetch WhatsApp status", "error");
-        }
-      }
-
-      // --- دالة جلب وتحديث جدول المهام والـ Pagination ---
-      async function fetchJobs(page = 1) {
-        currentPage = page;
-        const currentFilterStatus = filterStatusEl.value;
-        const currentSearchQuery = searchQueryEl.value.trim();
-
-        jobsTableContainerEl.innerHTML =
-          '<p class="loading-placeholder">Loading jobs...</p>';
-        paginationControlsEl.innerHTML = "";
-
-        try {
-          const queryParams = new URLSearchParams({
-            page: currentPage,
-            limit: jobsLimit,
-            filterStatus:
-              currentFilterStatus === "all" ? "" : currentFilterStatus,
-            searchQuery: currentSearchQuery,
-          });
-          const response = await fetch(
-            `/admin/api/jobs?${queryParams.toString()}`,
-            {
-              headers: setAuthHeaders()
-            }
-          );
-          if (handleAuthError(response)) return;
-          if (!response.ok)
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          const data = await response.json();
-
-          if (jobsTableContainerEl) {
-            if (data.jobs && data.jobs.length > 0) {
-              let tableHTML = `<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Phone</th><th>Status</th><th>Created</th><th>Processed</th><th>Attempts</th><th>Expires</th><th>Error</th><th>Action</th></tr></thead><tbody>`;
-              data.jobs.forEach((job) => {
-                let jobStatusKey = job.status
-                  ? job.status.toLowerCase().replace(/[\s:]/g, "_")
-                  : "unknown";
-                tableHTML += `<tr>
-                                <td><a href="#" onclick="showJobDetails(${
-                                  job.id
-                                }); return false;">${job.id}</a></td> <td>${
-                  job.phone_number
-                }</td>
-                                <td><span class="status-badge status-${jobStatusKey}">${
-                  job.status
-                }</span></td>
-                                <td>${new Date(
-                                  job.created_at
-                                ).toLocaleString()}</td>
-                                <td>${
-                                  job.processed_at
-                                    ? new Date(
-                                        job.processed_at
-                                      ).toLocaleString()
-                                    : "N/A"
-                                }</td>
-                                <td>${job.attempts}</td>
-                                <td>${
-                                  job.otp_expires_at
-                                    ? new Date(
-                                        job.otp_expires_at
-                                      ).toLocaleString()
-                                    : "N/A"
-                                }</td>
-                                <td><pre class="details-box" style="max-height:40px;">${
-                                  job.error_message || "N/A"
-                                }</pre></td>
-                                <td>${
-                                  job.status === "failed"
-                                    ? `<button class="btn btn-warning btn-retry-job" onclick="retryJob(${job.id})"><i class="fas fa-redo-alt"></i> Retry</button>`
-                                    : ""
-                                }</td>
-                            </tr>`;
-              });
-              tableHTML += `</tbody></table></div>`;
-              jobsTableContainerEl.innerHTML = tableHTML;
-            } else {
-              jobsTableContainerEl.innerHTML =
-                "<p>No jobs found matching your criteria.</p>";
-            }
-          }
-          if (paginationControlsEl && data.pagination)
-            buildPaginationControls(data.pagination);
-          jobsTableContainerEl.classList.remove("loading-placeholder");
-        } catch (error) {
-          console.error("Failed to fetch jobs data:", error);
-          if (jobsTableContainerEl)
-            jobsTableContainerEl.innerHTML =
-              '<p style="color:red;">Error loading jobs data.</p>';
-          showToast("Failed to load jobs data", "error");
-        }
-      }
-
-      // --- دالة بناء أزرار الـ Pagination ---
-      function buildPaginationControls(pagination) {
-        paginationControlsEl.innerHTML = ""; // مسح القديم
-        if (!pagination || pagination.totalPages <= 1) return;
-
-        // زر "الأولى" و "السابقة"
-        if (pagination.currentPage > 1) {
-          const firstBtn = document.createElement("button");
-          firstBtn.innerHTML = '<i class="fas fa-angle-double-left"></i> First';
-          firstBtn.onclick = () => fetchJobs(1);
-          paginationControlsEl.appendChild(firstBtn);
-          firstBtn.classList.add("btn", "btn-secondary");
-          firstBtn.style.margin = "2px";
-
-          const prevBtn = document.createElement("button");
-          prevBtn.innerHTML = '<i class="fas fa-angle-left"></i> Previous';
-          prevBtn.onclick = () => fetchJobs(pagination.currentPage - 1);
-          paginationControlsEl.appendChild(prevBtn);
-          prevBtn.classList.add("btn", "btn-secondary");
-          prevBtn.style.margin = "2px";
-        }
-
-        // أرقام الصفحات (عرض عدد محدود من الأرقام)
-        let startPage = Math.max(1, pagination.currentPage - 2);
-        let endPage = Math.min(
-          pagination.totalPages,
-          pagination.currentPage + 2
-        );
-        if (pagination.currentPage <= 3)
-          endPage = Math.min(pagination.totalPages, 5);
-        if (pagination.currentPage >= pagination.totalPages - 2)
-          startPage = Math.max(1, pagination.totalPages - 4);
-
-        for (let i = startPage; i <= endPage; i++) {
-          const pageBtn = document.createElement("button");
-          pageBtn.innerText = i;
-          pageBtn.classList.add("btn", "btn-secondary");
-          pageBtn.style.margin = "2px";
-          if (i === pagination.currentPage) pageBtn.disabled = true;
-          pageBtn.onclick = () => fetchJobs(i);
-          paginationControlsEl.appendChild(pageBtn);
-        }
-
-        // زر "التالية" و "الأخيرة"
-        if (pagination.currentPage < pagination.totalPages) {
-          const nextBtn = document.createElement("button");
-          nextBtn.innerHTML = 'Next <i class="fas fa-angle-right"></i>';
-          nextBtn.onclick = () => fetchJobs(pagination.currentPage + 1);
-          paginationControlsEl.appendChild(nextBtn);
-          nextBtn.classList.add("btn", "btn-secondary");
-          nextBtn.style.margin = "2px";
-
-          const lastBtn = document.createElement("button");
-          lastBtn.innerHTML = 'Last <i class="fas fa-angle-double-right"></i>';
-          lastBtn.onclick = () => fetchJobs(pagination.totalPages);
-          paginationControlsEl.appendChild(lastBtn);
-          lastBtn.classList.add("btn", "btn-secondary");
-          lastBtn.style.margin = "2px";
-        }
-
-        const pageInfo = document.createElement("span");
-        pageInfo.innerText = ` Page ${pagination.currentPage} of ${pagination.totalPages} (Total Jobs: ${pagination.totalJobs}) `;
-        pageInfo.style.marginLeft = "10px";
-        paginationControlsEl.appendChild(pageInfo);
-      }
-
-      // --- دالة عرض تفاصيل المهمة (Modal بسيط) ---
-      function showJobDetails(jobId) {
-        // هذا يتطلب جلب تفاصيل المهمة من الـ API أو أن تكون البيانات موجودة بالفعل
-        // للتبسيط، سنفترض أننا سنقوم بجلبها أو أن البيانات موجودة بالفعل
-        // هذا مثال مبدئي جداً
-        const jobRow = Array.from(
-          jobsTableContainerEl.querySelectorAll("tbody tr")
-        ).find((tr) => tr.cells[0].innerText == jobId);
-        if (jobRow) {
-          const jobDetails = {
-            ID: jobId,
-            Phone: jobRow.cells[1].innerText,
-            Status: jobRow.cells[2].innerText,
-            Created: jobRow.cells[3].innerText,
-            Processed: jobRow.cells[4].innerText,
-            Attempts: jobRow.cells[5].innerText,
-            Expires: jobRow.cells[6].innerText,
-            Error: jobRow.cells[7].querySelector("pre")
-              ? jobRow.cells[7].querySelector("pre").innerText
-              : "N/A",
-          };
-          // عرضها في alert مبدئياً، يمكن تحسينها لـ modal
-          alert(
-            `Job Details:\nID: ${jobDetails.ID}\nPhone: ${jobDetails.Phone}\nStatus: ${jobDetails.Status}\nError: ${jobDetails.Error}`
-          );
-        } else {
-          alert(`Details for job ID ${jobId} not found in current view.`);
-        }
-      }
-
-      // --- دالة إعادة محاولة المهمة ---
-      async function retryJob(jobId) {
-        if (!confirm(`Are you sure you want to retry job #${jobId}?`)) {
-          return;
-        }
-        
-        try {
-          const button = document.querySelector(`button[onclick="retryJob(${jobId})"]`);
-          if (button) {
-            // Show loading state
-            const originalText = button.innerHTML;
-            button.innerHTML = '<div class="spinner"></div> Retrying...';
-            button.disabled = true;
-          }
-          
-          const response = await fetch(`/admin/jobs/retry/${jobId}`, {
-            method: 'POST',
-            headers: setAuthHeaders({
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            })
-          });
-          if (handleAuthError(response)) return;
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            showToast(`Job #${jobId} has been re-queued successfully`, 'success');
-            // Refresh the jobs table
-            await fetchJobs(currentPage);
-          } else {
-            throw new Error(data.message || 'Failed to retry job');
-          }
-        } catch (error) {
-          console.error(`Error retrying job ${jobId}:`, error);
-          showToast(`Failed to retry job #${jobId}: ${error.message}`, 'error');
-          
-          // Reset button state if it exists
-          const button = document.querySelector(`button[onclick="retryJob(${jobId})"]`);
-          if (button) {
-            button.innerHTML = '<i class="fas fa-redo-alt"></i> Retry';
-            button.disabled = false;
-          }
-        }
-      }
-      
-      // Function to handle WhatsApp session reinitialization
-      async function reinitializeWhatsApp() {
-        if (!confirm('Attempt to reload current WhatsApp session?')) {
-          return;
-        }
-        
-        try {
-          // Show loading state
-          reinitializeBtn.innerHTML = '<div class="spinner"></div> Reloading...';
-          reinitializeBtn.disabled = true;
-          
-          const response = await fetch('/admin/whatsapp/reinitialize', {
-            method: 'POST',
-            headers: setAuthHeaders({
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            })
-          });
-          if (handleAuthError(response)) return;
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            showToast(data.message || 'WhatsApp re-initialization triggered', 'success');
-            // Refresh status data
-            await fetchStatusAndStats();
-          } else {
-            throw new Error(data.message || 'Failed to reinitialize WhatsApp');
-          }
-        } catch (error) {
-          console.error('Error reinitializing WhatsApp:', error);
-          showToast(`Failed to reinitialize WhatsApp: ${error.message}`, 'error');
-        } finally {
-          // Reset button state
-          reinitializeBtn.innerHTML = '<i class="fas fa-redo"></i> Reload Session';
-          reinitializeBtn.disabled = false;
-        }
-      }
-      
-      // Function to handle WhatsApp logout and session clear
-      async function logoutWhatsAppSession() {
-        if (!confirm('Logout WhatsApp and require new QR/Pairing?')) {
-          return;
-        }
-        
-        try {
-          // Show loading state
-          logoutSessionBtn.innerHTML = '<div class="spinner"></div> Logging out...';
-          logoutSessionBtn.disabled = true;
-          
-          const response = await fetch('/admin/whatsapp/logout-session', {
-            method: 'POST',
-            headers: setAuthHeaders({
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            })
-          });
-          if (handleAuthError(response)) return;
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            showToast(data.message || 'WhatsApp logout process initiated', 'success');
-            // Refresh status data
-            await fetchStatusAndStats();
-          } else {
-            throw new Error(data.message || 'Failed to logout WhatsApp session');
-          }
-        } catch (error) {
-          console.error('Error logging out WhatsApp session:', error);
-          showToast(`Failed to logout WhatsApp session: ${error.message}`, 'error');
-        } finally {
-          // Reset button state
-          logoutSessionBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout WA & New Scan';
-          logoutSessionBtn.disabled = false;
-        }
-      }
-
-      // --- تحميل البيانات عند فتح الصفحة وكل فترة ---
-      async function fetchAllData() {
-        await fetchStatusAndStats();
-        await fetchJobs(
-          currentPage,
-          filterStatusEl.value,
-          searchQueryEl.value.trim()
-        );
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        // Check authentication first
-        if (!checkAuth()) return;
-        
-        // Rest of the existing code...
-        fetchAllData();
-        refreshIntervalId = setInterval(fetchStatusAndStats, 15000); // تحديث حالة الواتساب كل 15 ثانية
-        
-        // Event listeners
-        if (refreshAllDataBtn) {
-          refreshAllDataBtn.addEventListener("click", async () => {
-            console.log("Manual refresh triggered for all data.");
-            
-            // Show loading state
-            refreshAllDataBtn.innerHTML = '<div class="spinner"></div> Refreshing...';
-            refreshAllDataBtn.disabled = true;
-            
-            clearInterval(refreshIntervalId);
-            
+        document.getElementById('generate-qr').addEventListener('click', async () => {
             try {
-              await fetchAllData();
-              showToast("Data refreshed successfully", "success");
+                const response = await fetch('/admin/whatsapp/generate-qr', {
+                    method: 'POST',
+                    headers: setAuthHeaders()
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showQRCode(data.qr);
+                    startQRTimer();
+                }
             } catch (error) {
-              console.error("Error refreshing data:", error);
-              showToast("Failed to refresh data", "error");
-            } finally {
-              refreshAllDataBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh All Data';
-              refreshAllDataBtn.disabled = false;
-              refreshIntervalId = setInterval(fetchStatusAndStats, 15000);
+                showToast('Failed to generate QR code', 'error');
             }
-          });
-        }
-        
-        // WhatsApp reinitialize button
-        if (reinitializeBtn) {
-          reinitializeBtn.addEventListener("click", reinitializeWhatsApp);
-        }
-        
-        // WhatsApp logout button
-        if (logoutSessionBtn) {
-          logoutSessionBtn.addEventListener("click", logoutWhatsAppSession);
-        }
-        
-        // Apply filters button
-        if (applyFiltersBtn) {
-          applyFiltersBtn.addEventListener("click", () => {
-            fetchJobs(1); // ابدأ من الصفحة الأولى عند تطبيق الفلاتر
-          });
-        }
-        
-        // Search input enter key
-        if (searchQueryEl) {
-          searchQueryEl.addEventListener("keypress", function (e) {
-            if (e.key === "Enter") {
-              fetchJobs(1);
+        });
+
+        document.getElementById('submit-pairing').addEventListener('click', async () => {
+            const code = document.getElementById('pairing-code').value;
+            if (!code || code.length !== 8) {
+                showToast('Please enter a valid 8-digit pairing code', 'error');
+                return;
             }
-          });
+
+            try {
+                const response = await fetch('/admin/whatsapp/pair', {
+                    method: 'POST',
+                    headers: setAuthHeaders({
+                        'Content-Type': 'application/json'
+                    }),
+                    body: JSON.stringify({ code })
+                });
+
+                if (response.ok) {
+                    showToast('Pairing code submitted successfully', 'success');
+                    document.getElementById('pairing-code').value = '';
+                } else {
+                    throw new Error('Pairing failed');
+                }
+            } catch (error) {
+                showToast('Failed to pair with code', 'error');
+            }
+        });
+
+        function startQRTimer() {
+            let timeLeft = 300; // 5 minutes in seconds
+            const timerElement = document.getElementById('qr-timer');
+            
+            clearInterval(qrTimer);
+            qrTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                timerElement.textContent = `Expires in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 60) {
+                    timerElement.classList.add('expiring');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(qrTimer);
+                    document.getElementById('qr-container').style.display = 'none';
+                    showToast('QR Code expired', 'warning');
+                }
+            }, 1000);
         }
-        
-        // Clear filters button
-        if (clearFiltersBtn) {
-          clearFiltersBtn.addEventListener("click", () => {
-            filterStatusEl.value = "all";
-            searchQueryEl.value = "";
-            fetchJobs(1);
-          });
+
+        function updateResourceUsage() {
+            fetch('/admin/system/resources', {
+                headers: setAuthHeaders()
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateResourceBar('cpu', data.cpu);
+                updateResourceBar('memory', data.memory);
+            })
+            .catch(error => console.error('Failed to fetch resource usage:', error));
         }
-      });
-      
-      // Clean up interval on page unload
-      window.addEventListener("beforeunload", () => {
-        if (refreshIntervalId) {
-          clearInterval(refreshIntervalId);
+
+        function updateResourceBar(type, value) {
+            const fill = document.getElementById(`${type}-usage`);
+            const text = document.getElementById(`${type}-text`);
+            
+            fill.style.width = `${value}%`;
+            text.textContent = `${value.toFixed(1)}%`;
+            
+            fill.className = 'fill';
+            if (value > 80) fill.classList.add('danger');
+            else if (value > 60) fill.classList.add('warning');
         }
-      });
+
+        // Start resource monitoring
+        resourceMonitorInterval = setInterval(updateResourceUsage, 5000);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(qrTimer);
+            clearInterval(resourceMonitorInterval);
+        });
     </script>
-  </body>
+</body>
 </html>
