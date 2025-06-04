@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh;
+        background-color: #f4f4f4;
+        margin: 0;
+      }
+      .login-container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        width: 320px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .login-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+      h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+      }
+      .input-group {
+        margin-bottom: 15px;
+      }
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+      }
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      .input-group input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        outline: none;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+      }
+      button:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+      }
+      button:active {
+        transform: translateY(0);
+      }
+      .error-message {
+        color: red;
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 0.9em;
+        animation: shake 0.5s ease-in-out;
+      }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+      }
+      .login-status {
+        text-align: center;
+        margin-top: 15px;
+        color: #666;
+        font-size: 0.9em;
+      }
+      .spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-top-color: #007bff;
+        border-radius: 50%;
+        margin: 0 auto 10px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>Admin Login</h2>
+      <% if (typeof error !== 'undefined' && error) { %>
+      <p class="error-message"><%= error %></p>
+      <% } %>
+      <form id="loginForm" action="/admin/login" method="POST">
+        <div class="input-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" required />
+        </div>
+        <div class="input-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+        <div class="spinner" id="loginSpinner"></div>
+        <button type="submit" id="loginButton">Login</button>
+      </form>
+      <p class="login-status" id="loginStatus"></p>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const loginSpinner = document.getElementById('loginSpinner');
+        const loginStatus = document.getElementById('loginStatus');
+
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Show loading state
+          loginButton.disabled = true;
+          loginSpinner.style.display = 'block';
+          loginStatus.textContent = 'Logging in...';
+          
+          // Get form data
+          const formData = new FormData(form);
+          const data = {
+            username: formData.get('username'),
+            password: formData.get('password')
+          };
+          
+          // Send AJAX request
+          fetch('/admin/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(data),
+            credentials: 'same-origin'
+          })
+          .then(response => {
+            return response.json().then(data => {
+              if (response.ok) {
+                loginStatus.textContent = 'Login successful! Redirecting...';
+                
+                // Store token in localStorage for API calls
+                if (data.token) {
+                  localStorage.setItem('adminToken', data.token);
+                }
+                
+                // Redirect to dashboard
+                window.location.href = data.redirectTo || '/admin/status';
+              } else {
+                throw new Error(data.message || 'Login failed');
+              }
+            });
+          })
+          .catch(error => {
+            console.error('Login error:', error);
+            loginStatus.textContent = error.message || 'Login failed. Please try again.';
+            loginStatus.style.color = 'red';
+            loginButton.disabled = false;
+            loginSpinner.style.display = 'none';
+            
+            // Add shake animation to form
+            const container = document.querySelector('.login-container');
+            container.style.animation = 'none';
+            setTimeout(() => {
+              container.style.animation = 'shake 0.5s ease-in-out';
+            }, 10);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

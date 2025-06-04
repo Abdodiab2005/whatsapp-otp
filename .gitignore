@@ -1,0 +1,9 @@
+node_modules
+config/.env
+.wwebjs_cache
+logs
+database/baileys_auth_info
+database/app_data.db
+backup.zip
+nodemon.json
+wa-otp-script.zip
